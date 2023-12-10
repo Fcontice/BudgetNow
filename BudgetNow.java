@@ -57,6 +57,7 @@ public class BudgetNow {
         }
     }
 
+// register user
     private static User registerUser(Scanner scanner) {
         System.out.print("Enter a username: ");
         String username = scanner.nextLine();
@@ -87,7 +88,7 @@ public class BudgetNow {
         return user; // newly registered user logged in automatically
     }
     
-
+// login user
     private static void loginUser(Scanner scanner) {
         System.out.print("Enter your username: ");
         String username = scanner.nextLine();
@@ -127,15 +128,17 @@ public class BudgetNow {
         }
     }
 
+// budget menu options (ADD BUDGET, VIEW/CHANGE BUDGETS, VIEW BANK ACCOUNTS, CHANGE INITIAL BALANCES, ADD EXPENSES, ADD FINANCIAL GOAL, VIEW FINANCIAL GOALS, LOGOUT)
     private static void showBudgetMenu(Scanner scanner) {
         while (loggedInUser != null) {
             System.out.println("\n\n\nBudget Menu:\n");
             System.out.println("1. Add Budget");
             System.out.println("2. View/Change Budgets");
-            System.out.println("3. View/Change Bank Accounts");
-            System.out.println("4. Add Expenses");
-            System.out.println("5. Add Financial Goal");
-            System.out.println("6. View Financial Goals");
+            System.out.println("3. View Bank Accounts");
+            System.out.println("4. Change Initial Balances");
+            System.out.println("6. Add Expenses");
+            System.out.println("7. Add Financial Goal");
+            System.out.println("8. View Financial Goals");
             System.out.println("0. Logout");
             System.out.print("\nSelect an option: ");
 
@@ -153,12 +156,15 @@ public class BudgetNow {
                     viewBankAccounts();
                     break;
                 case 4:
+                    changeAccountBalance(scanner);
+                    break;
+                case 5:
                     addExpense(scanner);
                     return;
-                case 5:
+                case 6:
                     addFinancialGoal(scanner);
                     break;
-                case 6:
+                case 7:
                     viewFinancialGoals();
                     break;
                 case 0:
@@ -171,6 +177,7 @@ public class BudgetNow {
         }
     }
 
+// add budget options (FOOD, AUTO & TRANSPORTATION, SHOPPING, ENTERTAINMENT, PERSONAL, OTHER)
     private static void addBudget(Scanner scanner) {
         System.out.println("\n\n\nSelect Budget Category:\n");
         System.out.println("1. Food");
@@ -232,7 +239,8 @@ public class BudgetNow {
             return; // Return to the budget menu
         }
     }
-   // view list of budgets
+
+// view list of budgets
     private static void viewBudgets(Scanner scanner) {
         while (true) {
             System.out.println("\nBudget List:\n");
@@ -261,7 +269,7 @@ public class BudgetNow {
         }
     }
 
-    // manage budget options (CHANGE BUDGET AMOUNT, REMOVE BUDGET)
+// manage budget options (CHANGE BUDGET AMOUNT, REMOVE BUDGET)
     private static void manageBudget(Scanner scanner, Budget budget) {
         while (true) {
             System.out.println("\nManage Budget:\n");
@@ -288,7 +296,7 @@ public class BudgetNow {
         }
     }
 
-    // add expense to existing budgets
+// add expense to existing budgets
     private static void addExpense(Scanner scanner) {
         System.out.println("\n     Adding Expense:");
         System.out.println("_____________________________");
@@ -352,7 +360,8 @@ public class BudgetNow {
             System.out.println("Expense amount exceeds the budget amount.");
         }
     }
-    // change already created budget amount
+
+// change already created budget amount
     private static void changeBudgetAmount(Scanner scanner, Budget budget) {
         System.out.print("Enter the new budget amount: ");
         double newAmount = scanner.nextDouble();
@@ -362,13 +371,13 @@ public class BudgetNow {
         System.out.println("Budget amount updated successfully!");
     }
 
-    // remove budget
+// remove budget
     private static void removeBudget(Budget budget) {
         loggedInUser.removeBudget(budget);
         System.out.println("Budget removed successfully!");
     }
 
-    // view bank accounts
+// view bank accounts
     private static void viewBankAccounts() {
         Map<String, Double> accounts = loggedInUser.getInitialBalances();
         double totalBalance = 0;
@@ -388,6 +397,61 @@ public class BudgetNow {
         System.out.println("\nPress Enter to go back to the Budget Menu.");
         new Scanner(System.in).nextLine();
     }
+
+// change account balances
+    private static void changeAccountBalance(Scanner scanner) {
+        Map<String, Double> accounts = loggedInUser.getInitialBalances();
+
+        if (accounts.isEmpty()) {
+            System.out.println("You don't have any accounts yet. Please set up your initial account balances first.");
+            return;
+        }
+        System.out.println("\nCurrent Bank Accounts:\n");
+        int index = 1;
+        Map<Integer, String> accountOptions = new HashMap<>();
+    
+        for (Map.Entry<String, Double> entry : accounts.entrySet()) {
+            String accountName = entry.getKey();
+            double balance = entry.getValue();
+    
+            System.out.println(index + ". Account Name: " + accountName + ", Balance: $" + balance);
+            accountOptions.put(index, accountName);
+            index++;
+        }
+        System.out.println("0. Back to Budget Menu");
+        accountOptions.put(0, "Back");
+    
+        System.out.print("\nSelect an account to update or enter 0 to go back: ");
+        int accountChoice = scanner.nextInt();
+        scanner.nextLine();
+    
+        if (accountChoice == 0) {
+            return; // Return to menu
+        } else if (accountOptions.containsKey(accountChoice)) {
+            String selectedAccountName = accountOptions.get(accountChoice);
+            System.out.print("Enter the new balance for account " + selectedAccountName + ": ");
+            double newBalance = scanner.nextDouble();
+            scanner.nextLine();
+    
+            loggedInUser.setInitialBalance(selectedAccountName, newBalance);
+            System.out.println("Account balance updated successfully!");
+
+            System.out.println("\nUpdated Bank Accounts:\n");
+            for (Map.Entry<String, Double> entry : accounts.entrySet()) {
+                String accountName = entry.getKey();
+                double balance = entry.getValue();
+        
+                System.out.println("Account Name: " + accountName);
+                System.out.println("Balance: $" + balance + "\n");
+            }
+            System.out.println("\nPress Enter to go back to the Budget Menu.");
+            scanner.nextLine();
+        } else {
+            System.out.println("Invalid account selection. Please try again.");
+        }
+    }
+
+// view financial goals
     private static void viewFinancialGoals() {
         List<FinancialGoal> goals = loggedInUser.getFinancialGoals();
         if (goals.isEmpty()) {
@@ -405,7 +469,7 @@ public class BudgetNow {
         new Scanner(System.in).nextLine();
     }
 
-    // adding a financial goal
+// adding a financial goal
     private static void addFinancialGoal(Scanner scanner) {
         if (loggedInUser == null) {
             System.out.println("Please log in to add a financial goal.");
@@ -433,9 +497,7 @@ public class BudgetNow {
 
 
 
-
-
-    // User, Budget, and Expense classes
+// User, Budget, and Expense classes
     public static class User {
         private String username;
         private String password;

@@ -132,10 +132,11 @@ public class BudgetNow {
             System.out.println("\n\n\nBudget Menu:\n");
             System.out.println("1. Add Budget");
             System.out.println("2. View/Change Budgets");
-            System.out.println("3. View/Change Bank Accounts");
-            System.out.println("4. Add Expenses");
-            System.out.println("5. Add Financial Goal");
-            System.out.println("6. View Financial Goals");
+            System.out.println("3. View Bank Accounts");
+            System.out.println("4. Change Initial Balances");
+            System.out.println("5. Add Expenses");
+            System.out.println("6. Add Financial Goal");
+            System.out.println("7. View Financial Goals");
             System.out.println("0. Logout");
             System.out.print("\nSelect an option: ");
 
@@ -153,12 +154,15 @@ public class BudgetNow {
                     viewBankAccounts();
                     break;
                 case 4:
+                    changeAccountBalance(scanner);
+                    break;
+                case 5:
                     addExpense(scanner);
                     return;
-                case 5:
+                case 6:
                     addFinancialGoal(scanner);
                     break;
-                case 6:
+                case 7:
                     viewFinancialGoals();
                     break;
                 case 0:
@@ -388,6 +392,63 @@ public class BudgetNow {
         System.out.println("\nPress Enter to go back to the Budget Menu.");
         new Scanner(System.in).nextLine();
     }
+
+    // change initial balance
+    private static void changeAccountBalance(Scanner scanner) {
+        Map<String, Double> accounts = loggedInUser.getInitialBalances();
+    
+        if (accounts.isEmpty()) {
+            System.out.println("You don't have any accounts yet. Please set up your initial account balances first.");
+            return;
+        }
+    
+        System.out.println("\nCurrent Bank Accounts:\n");
+        int index = 1;
+        Map<Integer, String> accountOptions = new HashMap<>();
+    
+        for (Map.Entry<String, Double> entry : accounts.entrySet()) {
+            String accountName = entry.getKey();
+            double balance = entry.getValue();
+    
+            System.out.println(index + ". Account Name: " + accountName + ", Balance: $" + balance);
+            accountOptions.put(index, accountName);
+            index++;
+        }
+    
+        System.out.println("0. Back to Budget Menu");
+        accountOptions.put(0, "Back");
+    
+        System.out.print("\nSelect an account to update or enter 0 to go back: ");
+        int accountChoice = scanner.nextInt();
+        scanner.nextLine();
+    
+        if (accountChoice == 0) {
+            return; // Return to the budget menu
+        } else if (accountOptions.containsKey(accountChoice)) {
+            String selectedAccountName = accountOptions.get(accountChoice);
+            System.out.print("Enter the new balance for account " + selectedAccountName + ": ");
+            double newBalance = scanner.nextDouble();
+            scanner.nextLine();
+    
+            loggedInUser.setInitialBalance(selectedAccountName, newBalance);
+            System.out.println("Account balance updated successfully!");
+
+            System.out.println("\nUpdated Bank Accounts:\n");
+            for (Map.Entry<String, Double> entry : accounts.entrySet()) {
+                String accountName = entry.getKey();
+                double balance = entry.getValue();
+        
+                System.out.println("Account Name: " + accountName);
+                System.out.println("Balance: $" + balance + "\n");
+            }
+            System.out.println("\nPress Enter to go back to the Budget Menu.");
+            scanner.nextLine();
+        } else {
+            System.out.println("Invalid account selection. Please try again.");
+        }
+    }
+
+    //view financial goals
     private static void viewFinancialGoals() {
         List<FinancialGoal> goals = loggedInUser.getFinancialGoals();
         if (goals.isEmpty()) {
